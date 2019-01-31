@@ -1,9 +1,9 @@
 # ROS-Camera
 Using Camera in ROS
 
-##Important Notes:
+## Important Notes:
 
-###How to find functions by name in OpenCV
+### How to find functions by name in OpenCV
 
 a.  Dumping all OpenCV function names and attributes:
 
