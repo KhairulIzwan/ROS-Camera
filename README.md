@@ -5,13 +5,13 @@ Using Camera in ROS
 
 ### How to find functions by name in OpenCV
 
-1.  Step 1
-2.  Step 2
+1.  Dumping all OpenCV function names and attributes:
+2.  Searching the OpenCV library for (partial) function names
 3.  Step 3
     1.  Step 3.1
     2.  Step 3.2
     3.  Step 3.3
-    
+
 1.  Dumping all OpenCV function names and attributes:
   1.  import cv2
   2.  funcs = dir(cv2)
