@@ -4,7 +4,9 @@ Using Camera in ROS
 Important Notes:
 
 1.  How to find functions by name in OpenCV
+
 a.  Dumping all OpenCV function names and attributes:
+
 $import cv2
 $funcs = dir(cv2)
 $for f in funcs:
