@@ -5,16 +5,15 @@ Using Camera in ROS
 
 ### How to find functions by name in OpenCV
 
-a.  Dumping all OpenCV function names and attributes:
+1.  Dumping all OpenCV function names and attributes:
+  1.  import cv2
+  2.  funcs = dir(cv2)
+  3.  for f in funcs:
+  4.  print(f)
 
-$import cv2
-$funcs = dir(cv2)
-$for f in funcs:
-$print(f)
-
-b.  Searching the OpenCV library for (partial) function names
-$ import imutils
-$ imutils.find_function("contour")
+2.  Searching the OpenCV library for (partial) function names
+  1.  import imutils
+  2.  imutils.find_function("contour")
 
 2.  Changes package from uvc_camera to cv_camera for usb-camera, webcam, and etc
 
