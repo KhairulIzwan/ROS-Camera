@@ -15,7 +15,8 @@ Using Camera in ROS
     1.  import imutils
     2.  imutils.find_function("contour")
 
-2.  Changes package from uvc_camera to cv_camera for usb-camera, webcam, and etc
+### Importanc Notes
+3.  Changes package from uvc_camera to cv_camera for usb-camera, webcam, and etc
 
 ### Files:
 1.  camera.launch (Updated --01022019 -- 4.22am (Ubuntu))
