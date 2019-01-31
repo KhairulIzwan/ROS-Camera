@@ -1,13 +1,15 @@
 <launch>
-  <node pkg="uvc_camera" name="cam0" type="uvc_camera_node" output="screen">
-  <!-- <node name="uvc_cam_node" pkg="uvc_cam" type="uvc_cam_node" output="screen"> -->
-      <param name="device" value="/dev/video0" />
-      <param name="width" value="320" />
-      <param name="height" value="240" />
-      <param name="frame_rate" value="30" />
+  <!-- Changes from uvc_camera (depreciated) to cv_camera package (well maintained) -->
+  <node ns="camera0" pkg="cv_camera" name="cam0" type="cv_camera_node" output="screen">
+    <param name="rate" value="30" />
+    <param name="device_id" value="0" />
+    <param name="frame_id" value="camera_primer" />
+    <param name="image_width" value="320" />
+    <param name="image_height" value="240" />
+    <!-- <param name="camera_info" value="???" /> -->
+    <!-- <param name="file" value="???" /> -->
   </node>
 
-  <!-- <node name="cam0_convert" pkg="camera_tutorials" type="ball_tracking_node.py" /> -->
-
   <node name="dynamic_reconfigure" pkg="dynamic_reconfigure" type="reconfigure_gui" />
+
 </launch>
