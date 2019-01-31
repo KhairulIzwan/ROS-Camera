@@ -1,0 +1,13 @@
+<launch>
+
+    <node ns="camera0" pkg="uvc_camera" name="cam0" type="uvc_camera_node">
+      <param name="device" type="string" value="/dev/video0" />
+      <param name="jpeq_quality" type="int" value="100" />
+    </node>
+
+    <node ns="camera1" pkg="uvc_camera" name="cam1" type="uvc_camera_node">
+      <param name="device" type="string" value="/dev/video1" />
+      <param name="jpeq_quality" type="int" value="100" />
+    </node>
+
+</launch>

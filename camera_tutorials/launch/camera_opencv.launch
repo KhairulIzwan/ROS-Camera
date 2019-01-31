@@ -1,0 +1,4 @@
+<launch>
+  <node name="listener1" pkg="camera_tutorials" type="camshift_node.py" />
+  <!-- <node ns="test_vision" pkg="camera_tutorials" name="cam0_convert" type="test_vision_node" /> -->
+</launch>

@@ -1,0 +1,13 @@
+<launch>
+  <node pkg="uvc_camera" name="cam0" type="uvc_camera_node" output="screen">
+  <!-- <node name="uvc_cam_node" pkg="uvc_cam" type="uvc_cam_node" output="screen"> -->
+      <param name="device" value="/dev/video0" />
+      <param name="width" value="320" />
+      <param name="height" value="240" />
+      <param name="frame_rate" value="30" />
+  </node>
+
+  <!-- <node name="cam0_convert" pkg="camera_tutorials" type="ball_tracking_node.py" /> -->
+
+  <node name="dynamic_reconfigure" pkg="dynamic_reconfigure" type="reconfigure_gui" />
+</launch>
