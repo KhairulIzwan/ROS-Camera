@@ -17,7 +17,7 @@ Using Camera in ROS
 
 2.  Changes package from uvc_camera to cv_camera for usb-camera, webcam, and etc
 
-Files:
-1. camera.launch (Updated --01022019 -- 4.22am (Ubuntu))
-  --  launch file of camera based on cv_camera parameter setting
-  --  for single camera (mono)
+### Files:
+1.  camera.launch (Updated --01022019 -- 4.22am (Ubuntu))
+    1.  launch file of camera based on cv_camera parameter setting
+    2. for single camera (mono)
