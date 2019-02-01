@@ -33,3 +33,9 @@ Using Camera in ROS
 
 4.  camera_opencv.launch (Update -- 01022019 -- 6.51pm (Ubuntu))
     1.  launch cv_camera (mono) + test_vision_node.py
+
+5.  tracking_node.py (Update -- 01022019 -- 6.51pm (Ubuntu))
+    1.  tracking greencolor object (predefined; hardcoded)
+
+6.  camera_opencv_tracking.launch (Update -- 01022019 -- 6.51pm (Ubuntu))
+    1.  launch cv_camera (mono) + tracking_node.py
