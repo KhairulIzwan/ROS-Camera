@@ -30,3 +30,6 @@ Using Camera in ROS
 
 3.  test_vision_node.py (Update -- 010122019 -- 5.37pm (Ubuntu))
     1.  subscribe with camera0/cam0
+
+4.  camera_opencv.launch (Update -- 01022019 -- 6.51pm (Ubuntu))
+    1.  launch cv_camera (mono) + test_vision_node.py
