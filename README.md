@@ -21,4 +21,9 @@ Using Camera in ROS
 ### Files:
 1.  camera.launch (Updated --01022019 -- 4.22am (Ubuntu))
     1.  launch file of camera based on cv_camera parameter setting
-    2. for single camera (mono)
+    2.  for single camera (mono)
+    3.  Deleting comments
+
+1.  double_camera.launch (Update -- 010122019 -- 4.42pm (Ubuntu)
+    1.  launch file of camera based on cv_camera parameter setting
+    2.  for multiple camera (mono)
