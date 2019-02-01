@@ -47,7 +47,7 @@ class tracking_node:
         # Subscribe to the raw camera image topic
         # subscribe to a topic using rospy.Subscriber class
         # sub=rospy.Subscriber('TOPIC_NAME', TOPIC_MESSAGE_TYPE, name_callback)
-        self.image_sub = rospy.Subscriber("image_raw", Image, self.callback)
+        self.image_sub = rospy.Subscriber("/camera0/cam0/image_raw", Image, self.callback)
 
     def callback(self, data):
         # Convert the raw image to OpenCV format using the convert_image() helper function
