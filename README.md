@@ -42,5 +42,5 @@ Using Camera in ROS
 
 5.  tracking_movement_node.py (Update -- 01022019 -- 7.10pm (Ubuntu))
     1.  the continuity of tracking greencolor object (predefined; hardcoded); tracking_node.py
-    2.  points (pts) of tracking points are accumulated and drawn.
+    2.  points (pts) of tracking points are accumulated and drawn -- in conjuntion can identify the movement of object tracking -- East, West, North, and etc.
 #### All codes (python -- object tracking etc were originally comes from www.pyimagesearch.com; some modification has been made to make it possible to works in ROS environment)
