@@ -27,14 +27,14 @@ class test_vision_node:
         # rospy.Publisher initialization
         # pub = rospy.Publisher('topic_name', std_msgs.msg.String, queue_size=10)
         # The only required arguments to create a rospy.Publisher are the topic name, the Message class, and the queue_size
-        self.image_pub = rospy.Publisher("image_raw_convert", Image, queue_size=10)
+        self.image_pub = rospy.Publisher("/OpenCV_IMG", Image, queue_size=10)
         # Create the cv_bridge object
         self.bridge = CvBridge()
 
         # Subscribe to the raw camera image topic
         # subscribe to a topic using rospy.Subscriber class
         # sub=rospy.Subscriber('TOPIC_NAME', TOPIC_MESSAGE_TYPE, name_callback)
-        self.image_sub = rospy.Subscriber("/cv_camera/image_raw", Image, self.callback)
+        self.image_sub = rospy.Subscriber("/camera0/cam0/image_raw", Image, self.callback)
 
     def callback(self,data):
         try:
