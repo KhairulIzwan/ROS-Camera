@@ -1,13 +1,23 @@
 <launch>
 
-    <node ns="camera0" pkg="uvc_camera" name="cam0" type="uvc_camera_node">
-      <param name="device" type="string" value="/dev/video0" />
-      <param name="jpeq_quality" type="int" value="100" />
-    </node>
+  <node ns="camera0" pkg="cv_camera" name="cam0" type="cv_camera_node">
+    <param name="rate" value="30" />
+    <param name="device_id" value="0" />
+    <param name="frame_id" value="camera_primer" />
+    <param name="image_width" value="320" />
+    <param name="image_height" value="240" />
+    <!-- <param name="camera_info" value="???" /> -->
+    <!-- <param name="file" value="???" /> -->
+  </node>
 
-    <node ns="camera1" pkg="uvc_camera" name="cam1" type="uvc_camera_node">
-      <param name="device" type="string" value="/dev/video1" />
-      <param name="jpeq_quality" type="int" value="100" />
-    </node>
+  <node ns="camera1" pkg="cv_camera" name="cam1" type="cv_camera_node">
+    <param name="rate" value="30" />
+    <param name="device_id" value="1" />
+    <param name="frame_id" value="camera_primer" />
+    <param name="image_width" value="320" />
+    <param name="image_height" value="240" />
+    <!-- <param name="camera_info" value="???" /> -->
+    <!-- <param name="file" value="???" /> -->
+  </node>
 
 </launch>
