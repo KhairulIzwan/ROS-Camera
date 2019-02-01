@@ -39,3 +39,5 @@ Using Camera in ROS
 
 6.  camera_opencv_tracking.launch (Update -- 01022019 -- 6.51pm (Ubuntu))
     1.  launch cv_camera (mono) + tracking_node.py
+
+#### All codes (python -- object tracking etc were originally comes from www.pyimagesearch.com; some modification has been made to make it possible to works in ROS environment)
