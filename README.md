@@ -40,7 +40,11 @@ Using Camera in ROS
 6.  camera_opencv_tracking.launch (Update -- 01022019 -- 6.51pm (Ubuntu))
     1.  launch cv_camera (mono) + tracking_node.py
 
-5.  tracking_movement_node.py (Update -- 01022019 -- 7.10pm (Ubuntu))
+7.  tracking_movement_node.py (Update -- 01022019 -- 7.10pm (Ubuntu))
     1.  the continuity of tracking greencolor object (predefined; hardcoded); tracking_node.py
     2.  points (pts) of tracking points are accumulated and drawn -- in conjuntion can identify the movement of object tracking -- East, West, North, and etc.
+
+8.  object_tracking_node (Update -- 01042019 -- 12.15am (Ubuntu))
+    1.  8 OpenCV Object Tracking Implementations
+
 #### All codes (python -- object tracking etc were originally comes from www.pyimagesearch.com; some modification has been made to make it possible to works in ROS environment)
