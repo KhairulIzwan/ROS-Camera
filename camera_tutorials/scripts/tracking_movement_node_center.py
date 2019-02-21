@@ -206,7 +206,7 @@ class tracking_movement_node:
             self.dist_x = self.center_x - self.object_x
             self.dist_y = self.center_y - self.object_y
 
-            # Next
+            # Next (MOTOR)
             if self.dist_x > 10:
                 self.dir_x = "TURN LEFT"
             elif self.dist_x < -10:
