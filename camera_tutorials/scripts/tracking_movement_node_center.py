@@ -70,6 +70,10 @@ class tracking_movement_node:
         # Refresh the displayed image
         cv2.imshow(self.cv_window_name_0,np.hstack([self.cv_image]))
         cv2.imshow(self.cv_window_name_1, self.cv_mask)
+
+        # Add Cross-Bar at center
+        cv2.line(self.cv_image, (0, 0), (self.cv_image.shape[0], self.cv_image.shape[1]), (255, 0, 0))
+
         cv2.waitKey(1)
 
     def convert_image(self, ros_image):
@@ -88,7 +92,7 @@ class tracking_movement_node:
 
             # construct a mask for the color "green", then perform a series of dilations and erosions to remove any small blobs left in the mask
             self.cv_mask = cv2.inRange(hsv, self.greenLower, self.greenUpper)
-            self.cv_mask = cv2.erode(self.cv_mask, None, iterationsS=2)
+            self.cv_mask = cv2.erode(self.cv_mask, None, iterations=2)
             self.cv_mask = cv2.dilate(self.cv_mask, None, iterations=2)
         except CvBridgeError as e:
             print (e)
@@ -117,6 +121,10 @@ class tracking_movement_node:
                 roi.y_offset = int(M["m01"] / M["m00"])
                 roi.width = w
                 roi.height = h
+
+                #
+                self.object_x = roi.x_offset
+                self.object_y = roi.y_offset
 
                 self.roi_pub.publish(roi)
 
@@ -171,6 +179,49 @@ class tracking_movement_node:
             cv2.putText(self.cv_image, self.direction, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.65, (0, 0, 255), 3)
             cv2.putText(self.cv_image, "dx: {}, dy: {}".format(self.dX, self.dY), (10, self.cv_image.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 0, 255), 1)
             # cv2.putText(self.cv_image, "counter: {}".format(self.counter), (10, self.cv_image.shape[0] - 30), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 0, 255), 1)
+
+            # Add Cross-Bar at center
+            # Horizontal
+            # rospy.loginfo(self.cv_image.shape)
+            cv2.line(self.cv_image, (0, self.cv_image.shape[0] // 3), (self.cv_image.shape[1], self.cv_image.shape[0] // 3), (255, 0, 0))
+            cv2.line(self.cv_image, (0, 2 * self.cv_image.shape[0] // 3), (self.cv_image.shape[1], 2 * self.cv_image.shape[0] // 3), (255, 0, 0))
+
+            # Vertical
+            cv2.line(self.cv_image, (self.cv_image.shape[1] // 3, 0), (self.cv_image.shape[1] // 3, self.cv_image.shape[0]), (255, 0, 0))
+            cv2.line(self.cv_image, (2 * self.cv_image.shape[1] // 3, 0), (2 * self.cv_image.shape[1] // 3, self.cv_image.shape[0]), (255, 0, 0))
+
+            # Yellow Circle
+            # # cv2.circle(self.cv_image, (2 * self.cv_image.shape[1] // 3,  2 * self.cv_image.shape[0] // 3), 3, (0, 255, 255), 2)
+            # cv2.circle(self.cv_image, (self.cv_image.shape[1] // 3, 2 * self.cv_image.shape[0] // 3), 3, (0, 255, 255), 2)
+            # cv2.circle(self.cv_image, (2 * self.cv_image.shape[1] // 3, self.cv_image.shape[0]), 3, (0, 255, 255), 2)
+            # # cv2.circle(self.cv_image, (self.cv_image.shape[1] // 3, self.cv_image.shape[0]), 3, (0, 255, 255), 2)
+
+            # # Start coordinate,# End coordinate
+            cv2.rectangle(self.cv_image, (self.cv_image.shape[1] // 3, 2 * self.cv_image.shape[0] // 3), (2 * self.cv_image.shape[1] // 3, self.cv_image.shape[0]), (255, 0, 255), 2)
+
+            # Object Distance from Center
+            self.center_x = self.cv_image.shape[1] // 2
+            self.center_y = (2 * self.cv_image.shape[0] // 3) + ((self.cv_image.shape[0] // 3) // 2)
+
+            self.dist_x = self.center_x - self.object_x
+            self.dist_y = self.center_y - self.object_y
+
+            # Next
+            if self.dist_x > 10:
+                self.dir_x = "TURN LEFT"
+            elif self.dist_x < -10:
+                self.dir_x = "TURN RIGHT"
+            else:
+                self.dir_x = "NO TURN"
+
+            if self.dist_y > 10:
+                self.dir_y = "FORWARD"
+            elif self.dist_y < -10:
+                self.dir_y = "REVERSE"
+            else:
+                self.dir_y = "STOP, DO NEXT ACTION"
+
+            rospy.loginfo([self.dist_x, self.dir_x, self.dist_y, self.dir_y])
 
             self.counter += 1
 

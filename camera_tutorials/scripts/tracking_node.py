@@ -26,8 +26,10 @@ class tracking_node:
         self.cv_window_name_1 = "OpenCV Image Mask"
 
         # define the lower and upper boundaries of the "green" ball in the HSV color space, then initialize the list of tracked points
+        # Set the value manually HSV
         self.greenLower = (29, 86, 6)
         self.greenUpper = (255, 255, 255)
+
         self.pts = deque(maxlen=64)
 
         # Create the window and make it re-sizeable (second parameter = 0)
