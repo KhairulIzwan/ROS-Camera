@@ -27,7 +27,7 @@ class tracking_node:
 
         # define the lower and upper boundaries of the "green" ball in the HSV color space, then initialize the list of tracked points
         self.greenLower = (29, 86, 6)
-        self.greenUpper = (64, 255, 255)
+        self.greenUpper = (255, 255, 255)
         self.pts = deque(maxlen=64)
 
         # Create the window and make it re-sizeable (second parameter = 0)
