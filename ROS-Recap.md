@@ -15,6 +15,8 @@
         2.  change the device_id (mandatory) and name
 
 # How to install packages from github
-1.  cs or cd ~/catkin_ws/src
+1.  cs OR cd ~/catkin_ws/src
 2.  git clone -b <branch> <address>
     1. example: git clone -b https://github.com/KhairulIzwan/ROS-Camera.git
+3.  cm OR cd ~/catkin_ws && catkin_make
+4.  rospack profile (refresh the package available)
