@@ -12,4 +12,6 @@
 
   <node name="dynamic_reconfigure" pkg="dynamic_reconfigure" type="reconfigure_gui" />
 
+  <node ns="test_vision_node" name="test_vision" pkg="camera_tutorials" type="test_vision_node.py" />
+
 </launch>

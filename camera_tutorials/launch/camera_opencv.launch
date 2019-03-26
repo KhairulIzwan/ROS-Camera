@@ -2,7 +2,7 @@
 
   <node ns="camera0" pkg="cv_camera" name="cam0" type="cv_camera_node" output="screen">
     <param name="rate" value="30" />
-    <param name="device_id" value="1" />
+    <param name="device_id" value="0" />
     <param name="frame_id" value="camera_primer" />
     <param name="image_width" value="320" />
     <param name="image_height" value="240" />

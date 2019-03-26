@@ -73,14 +73,12 @@ class object_tracking_node:
         # Subscribe to the raw camera image topic
         # subscribe to a topic using rospy.Subscriber class
         # sub=rospy.Subscriber('TOPIC_NAME', TOPIC_MESSAGE_TYPE, name_callback)
-        self.image_sub = rospy.Subscriber("/camera0/cam0/image_raw", Image, self.callback)
+        self.image_sub = rospy.Subscriber("/cv_camera_node/cam0/image_raw", Image, self.callback)
+        self.image_info = rospy.Subscriber('/cv_camera_node/cam0/image_raw/camera_info', CameraInfo, self.do_preprocess)
 
     def callback(self, data):
         # Convert the raw image to OpenCV format using the convert_image() helper function
         self.convert_image(data)
-
-        # Apply image processing using do_preprocess() helper function
-        self.do_preprocess()
 
         # Apply tracking using do_track() helper function
         self.do_track()
@@ -97,14 +95,9 @@ class object_tracking_node:
         except CvBridgeError as e:
             print(e)
 
-    def do_preprocess(self):
-        try:
-            # resize the frame (so we can process it faster) and grab the frame dimensions
-            self.cv_image = imutils.resize(self.cv_image, width=320)
-            (self.H, self.W) = self.cv_image.shape[:2]
-
-        except CvBridgeError as e:
-            print (e)
+    def do_preprocess(self, data):
+        self.W = data.width
+        self.H = data.height
 
     def do_track(self):
         try:
