@@ -36,7 +36,7 @@ class range_detector_node:
         # Subscribe to the raw camera image topic
         # subscribe to a topic using rospy.Subscriber class
         # sub=rospy.Subscriber('TOPIC_NAME', TOPIC_MESSAGE_TYPE, name_callback)
-        self.image_sub = rospy.Subscriber("/cv_camera_node/cam0/image_raw", Image, self.callback)
+        self.image_sub = rospy.Subscriber("/opencv_img", Image, self.callback)
 
     def callback(self, data):
         # Convert the raw image to OpenCV format using the convert_image() helper function
@@ -129,7 +129,7 @@ def usage():
     print("%s [tracker]" % sys.argv[0])
 
 def main(args):
-    vn = range_detector_node(sys.argv[1])
+    vn = range_detector_node(sys.argv[1:])
 
     try:
         rospy.spin()

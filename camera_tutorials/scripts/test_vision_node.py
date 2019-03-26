@@ -45,23 +45,23 @@ class test_vision_node:
             print(e)
 # ------------------------------------------------------------------------------
 # Un-comment this area to view image
-        # # Get the width(cols), height(rows), and channels  of the image
-        # (rows,cols,channels) = cv_image.shape
-        #
-        # # optional (un-comment to preview)
-        # if cols > 60 and rows > 60:
-        #     cv2.circle(cv_image, (50, 50), 10, 255, -1)
-        #
-        # # Overlay some text onto the image display
-        # fontface = cv2.FONT_HERSHEY_DUPLEX
-        # fontscale = 2
-        # fontcolor = (255, 255, 255)
-        # # cv2.putText(img, text, org, fontFace, fontScale, color[, thickness[, lineType[, bottomLeftOrigin]]])
-        # cv2.putText(cv_image, self.cv_window_name, (50, rows / 2), fontface, fontscale, fontcolor, 1)
-        #
-        # # displaying an OpenCV image
-        # cv2.imshow(self.cv_window_name, cv_image)
-        # cv2.waitKey(1)
+        # Get the width(cols), height(rows), and channels  of the image
+        (rows,cols,channels) = cv_image.shape
+
+        # optional (un-comment to preview)
+        if cols > 60 and rows > 60:
+            cv2.circle(cv_image, (50, 50), 10, 255, -1)
+
+        # Overlay some text onto the image display
+        fontface = cv2.FONT_HERSHEY_DUPLEX
+        fontscale = 2
+        fontcolor = (255, 255, 255)
+        # cv2.putText(img, text, org, fontFace, fontScale, color[, thickness[, lineType[, bottomLeftOrigin]]])
+        cv2.putText(cv_image, self.cv_window_name, (50, rows / 2), fontface, fontscale, fontcolor, 1)
+
+        # displaying an OpenCV image
+        cv2.imshow(self.cv_window_name, cv_image)
+        cv2.waitKey(1)
 # ------------------------------------------------------------------------------
 
         try:
