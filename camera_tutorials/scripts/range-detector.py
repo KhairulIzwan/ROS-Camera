@@ -53,6 +53,7 @@ class range_detector_node:
         # self.get_trackbar_values()
         v1_min, v2_min, v3_min, v1_max, v2_max, v3_max = self.get_trackbar_values()
 
+        # publish
         msg = IntList()
         msg.v1_min = v1_min
         msg.v2_min = v2_min

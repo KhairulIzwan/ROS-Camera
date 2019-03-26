@@ -13,3 +13,8 @@
     3.  if use more than one camera:
         1.  https://answers.ros.org/question/288227/how-to-view-multiple-cameras-sing-cv_camera/
         2.  change the device_id (mandatory) and name
+
+# How to install packages from github
+1.  cs or cd ~/catkin_ws/src
+2.  git clone -b <branch> <address>
+    1. example: git clone -b https://github.com/KhairulIzwan/ROS-Camera.git

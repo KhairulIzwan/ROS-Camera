@@ -74,7 +74,7 @@ class ball_tracking_node:
 
         # Refresh the displayed image
         cv2.imshow(self.cv_window_original,np.hstack([self.cv_image]))
-        cv2.imshow(self.cv_window_mask, self.cv_mask)
+        # cv2.imshow(self.cv_window_mask, self.cv_mask)
         cv2.waitKey(1)
 
     def filter_callback(self, msg):
