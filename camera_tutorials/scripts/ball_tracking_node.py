@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+# Single ball tracking (color)
+
 from __future__ import print_function
 import roslib
 # roslib.load_manifest('my_package')
@@ -152,6 +154,7 @@ class ball_tracking_node:
 
                     self.target_pub.publish(self.bridge.cv2_to_imgmsg(self.cv_image_target, "bgr8"))
 
+                    # Un-comment to enable dataset collections
                     self.do_saveImage()
 
                     # update the points queue
@@ -201,6 +204,7 @@ class ball_tracking_node:
 
             self.counter += 1
 
+            # Un-comment if limit the dataset to save
             # if self.counter > 100:
             #     rospy.signal_shutdown('Quit')
 
@@ -208,7 +212,7 @@ class ball_tracking_node:
             print (e)
 
     def do_saveImage(self):
-        # define the name of the directory to be created
+        # define the name of the directory to be created (change accordingly)
         path = "dataset/ball_green"
 
         try:
@@ -221,7 +225,8 @@ class ball_tracking_node:
             pass
 
         img_no = "{:0>5d}".format(self.counter)
-        filename = "dataset/ball_green/dataset_ball_green_" + str(img_no) +".png"
+        filename = path + "/dataset_ball_green_" + str(img_no) +".png"
+        # filename = "dataset/ball_green/dataset_ball_green_" + str(img_no) +".png"
         rospy.loginfo(filename)
         cv2.imwrite(filename, self.cv_image_target)
 
