@@ -148,11 +148,11 @@ class ball_tracking_node:
                     cv2.rectangle(self.cv_image, (self.xBox, self.yBox), (self.xBox + self.w, self.yBox + self.h), (0, 255, 0), 2)
 
                     # cropped the target image and publish it
-                    self.cv_image_target = self.cv_image_copy[self.yBox:self.yBox + self.h, self.xBox:self.xBox + self.w]
+                    self.cv_image_target = self.cv_image_copy[self.yBox:self.yBox + 2*radius, self.xBox:self.xBox + self.w]
 
                     self.target_pub.publish(self.bridge.cv2_to_imgmsg(self.cv_image_target, "bgr8"))
 
-                    self.do_saveImage()
+                    # self.do_saveImage()
 
                     # update the points queue
                     self.pts.appendleft(center)
@@ -201,22 +201,29 @@ class ball_tracking_node:
 
             self.counter += 1
 
+            if self.counter > 100:
+                rospy.signal_shutdown('Quit')
+
         except CvBridgeError as e:
             print (e)
 
     def do_saveImage(self):
         # define the name of the directory to be created
-        path = os.getcwd() + "/src/ROS-Camera/camera_tutorials/green"
+        path = "dataset/ball_green"
 
-        # cwd = os.getcwd()
-        # print(cwd)
         try:
-            os.mkdir(path)
+            os.makedirs(path)
         except OSError:
-            print ("Creation of the directory %s failed" % path)
+            # print ("Creation of the directory %s failed" % path)
+            pass
         else:
-            print ("Successfully created the directory %s " % path)
+            # print ("Successfully created the directory %s " % path)
+            pass
 
+        img_no = "{:0>5d}".format(self.counter)
+        filename = "dataset/ball_green/dataset_ball_green_" + str(img_no) +".png"
+        rospy.loginfo(filename)
+        cv2.imwrite(filename, self.cv_image_target)
 
 def main(args):
     vn = ball_tracking_node()
