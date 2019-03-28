@@ -152,7 +152,7 @@ class ball_tracking_node:
 
                     self.target_pub.publish(self.bridge.cv2_to_imgmsg(self.cv_image_target, "bgr8"))
 
-                    # self.do_saveImage()
+                    self.do_saveImage()
 
                     # update the points queue
                     self.pts.appendleft(center)
@@ -201,8 +201,8 @@ class ball_tracking_node:
 
             self.counter += 1
 
-            if self.counter > 100:
-                rospy.signal_shutdown('Quit')
+            # if self.counter > 100:
+            #     rospy.signal_shutdown('Quit')
 
         except CvBridgeError as e:
             print (e)
