@@ -12,7 +12,24 @@
     2.  http://wiki.ros.org/dynamic_reconfigure
     3.  if use more than one camera:
         1.  https://answers.ros.org/question/288227/how-to-view-multiple-cameras-sing-cv_camera/
-        2.  change the device_id (mandatory) and name
+        2.  Eg:
+            1.  rosrun cv_camera cv_camera_node _device_id:=0 __name:=cam1
+            2.  rosrun cv_camera cv_camera_node _device_id:=1 __name:=cam2
+        3.  change the device_id (mandatory) and name
+    4. roslaunch camera_tutorials camera.launch (easiest way)
+    5. Publish: from sensor_msgs.msg import Image
+
+## Range Detector Node
+1.  use color filter (RGB or HSV) to find the upper and lower color range
+2.  rosrun camera_tutorials range_detector_node.py HSV (or RGB)
+3.  Publish: from camera_tutorials.msg import IntList
+4.  Subscribe: from sensor_msgs.msg import Image
+5.  Publish with unique name (anonymous=True)
+
+## Ball Tracking Node
+1.  rosrun camera_tutorials ball_tracking_node.py  
+2.  Subscribe: from camera_tutorials.msg import IntList
+3.  Publish: from sensor_msgs.msg import RegionOfInterest
 
 # How to install packages from github
 1.  cs OR cd ~/catkin_ws/src
