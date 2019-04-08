@@ -226,6 +226,7 @@ class ball_tracking_node:
 
         img_no = "{:0>5d}".format(self.counter)
         filename = path + "/dataset_ball_green_" + str(img_no) +".png"
+        
         # filename = "dataset/ball_green/dataset_ball_green_" + str(img_no) +".png"
         rospy.loginfo(filename)
         cv2.imwrite(filename, self.cv_image_target)

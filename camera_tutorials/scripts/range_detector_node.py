@@ -2,7 +2,7 @@
 
 from __future__ import print_function
 import roslib
-# roslib.load_manifest('my_package')
+roslib.load_manifest('camera_tutorials')
 import sys
 import rospy
 import os
@@ -13,22 +13,25 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 
 class range_detector_node:
-    def __init__(self, filter):
+    def __init__(self, filter, color_tags, topics1):
 
+        self.sub_topics1 = topics1
         self.filter = filter
+        self.color_tags = color_tags
 
         # Initializing your ROS Node
-        # rospy.init_node('my_node_name', anonymous=True)
+        # rospy.init_node('my_node_name', anonymous=True) ==> unique name
         # or
         # rospy.init_node('my_node_name')
-        rospy.init_node('range_detector_node')
+        rospy.init_node('range_detector_node', anonymous=True)
 
         # Give the OpenCV display window a name
-        self.cv_window_original = "Original"
-        self.cv_window_thresh = "Thresh"
-        self.cv_window_preview = "Preview"
+        self.cv_window_original = "Original_%s" % self.color_tags
+        self.cv_window_thresh = "Thresh_%s" % self.color_tags
+        self.cv_window_preview = "Preview_%s" % self.color_tags
 
-        self.range_pub = rospy.Publisher('/range_filter', IntList, queue_size=10)
+        pub_name = '/range_filter_%s' % self.color_tags
+        self.range_pub = rospy.Publisher(pub_name, IntList, queue_size=10)
 
         # Create the cv_bridge object
         self.bridge = CvBridge()
@@ -36,7 +39,7 @@ class range_detector_node:
         # Subscribe to the raw camera image topic
         # subscribe to a topic using rospy.Subscriber class
         # sub=rospy.Subscriber('TOPIC_NAME', TOPIC_MESSAGE_TYPE, name_callback)
-        self.image_sub = rospy.Subscriber("/cv_camera_node/cam0/image_raw", Image, self.callback)
+        self.image_sub = rospy.Subscriber(self.sub_topics1, Image, self.callback)
 
     def callback(self, data):
         # Convert the raw image to OpenCV format using the convert_image() helper function
@@ -101,13 +104,14 @@ class range_detector_node:
             print(e)
 
     def setup_trackbars(self):
-        cv2.namedWindow("Trackbars", 0)
+        self.cv_window_trackbar = "Trackbars_%s" % self.color_tags
+        cv2.namedWindow(self.cv_window_trackbar, 0)
 
         for i in ["MIN", "MAX"]:
             v = 0 if i == "MIN" else 255
 
             for j in self.filter.upper():
-                cv2.createTrackbar("%s_%s" % (j, i), "Trackbars", v, 255, self.callback_trackbars)
+                cv2.createTrackbar("%s_%s" % (j, i), self.cv_window_trackbar, v, 255, self.callback_trackbars)
 
     def callback_trackbars(self, value):
         pass
@@ -117,7 +121,7 @@ class range_detector_node:
 
         for i in ["MIN", "MAX"]:
             for j in self.filter.upper():
-                v = cv2.getTrackbarPos("%s_%s" % (j, i), "Trackbars")
+                v = cv2.getTrackbarPos("%s_%s" % (j, i), self.cv_window_trackbar)
                 values.append(v)
 
         return values
@@ -129,7 +133,7 @@ def usage():
     print("%s [tracker]" % sys.argv[0])
 
 def main(args):
-    vn = range_detector_node(sys.argv[1])
+    vn = range_detector_node(sys.argv[1], sys.argv[2], sys.argv[3])
 
     try:
         rospy.spin()
@@ -139,7 +143,10 @@ def main(args):
     cv2.destroyAllWindows()
 
 if __name__ == '__main__':
-    if len(sys.argv) == 2:
+    if len(sys.argv) == 4:
+        print("[Color Filter Type]: %s" % sys.argv[1])
+        print("[Color Name]: %s" % sys.argv[2])
+        print("[Subscribed Topic Name]: %s" % sys.argv[3])
         main(sys.argv)
     else:
         print(usage())
