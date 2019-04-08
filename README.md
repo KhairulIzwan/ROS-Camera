@@ -24,12 +24,14 @@ Using Camera in ROS
     2.  for single camera (mono)
     3.  Deleting comments
 
-2.  double_camera.launch (Update -- 010122019 -- 4.42pm (Ubuntu))
+2.  double_camera.launch (Update -- 01012019 -- 4.42pm (Ubuntu))
     1.  launch file of camera based on cv_camera parameter setting
     2.  for multiple camera (mono)
 
-3.  test_vision_node.py (Update -- 010122019 -- 5.37pm (Ubuntu))
+3.  test_vision_node.py (Update -- 01012019 -- 5.37pm (Ubuntu))
     1.  subscribe with camera0/cam0
+    2.  New:
+        1.  Updating the way we subscribed, and published a topics (Update -- 08042019 -- 5.37pm (Ubuntu))
 
 4.  camera_opencv.launch (Update -- 01022019 -- 6.51pm (Ubuntu))
     1.  launch cv_camera (mono) + test_vision_node.py
@@ -46,5 +48,8 @@ Using Camera in ROS
 
 8.  object_tracking_node (Update -- 01042019 -- 12.15am (Ubuntu))
     1.  8 OpenCV Object Tracking Implementations
+
+9.  range_detector_node (Update -- 08042019 -- (Ubuntu))
+    1.  Using trackbar (color) to fine tune color filter (HSV or RGB)
 
 #### All codes (python -- object tracking etc were originally comes from www.pyimagesearch.com; some modification has been made to make it possible to works in ROS environment)

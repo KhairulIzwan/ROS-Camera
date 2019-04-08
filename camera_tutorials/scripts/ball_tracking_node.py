@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+# Single ball tracking (color)
+
 from __future__ import print_function
 import roslib
 # roslib.load_manifest('my_package')
@@ -16,6 +18,8 @@ from cv_bridge import CvBridge, CvBridgeError
 from collections import deque
 # a list-like data structure with super fast appends and pops to maintain a list of the past N (x, y)-locations of the ball in our video stream. Maintaining such a queue allows us to draw the "contrail" of the ball as its being tracked.
 
+import os
+
 class ball_tracking_node:
     def __init__(self):
         # Initializing your ROS Node
@@ -27,6 +31,7 @@ class ball_tracking_node:
         # Give the OpenCV display window a name
         self.cv_window_original = "OpenCV Image"
         self.cv_window_mask = "OpenCV Image Mask"
+        self.cv_window_target = "Target"
 
         # TODO:
         # define the lower and upper boundaries of the "green" ball in the HSV color space, then initialize the list of tracked points
@@ -46,6 +51,8 @@ class ball_tracking_node:
         # pub = rospy.Publisher('topic_name', std_msgs.msg.String, queue_size=10)
         # The only required arguments to create a rospy.Publisher are the topic name, the Message class, and the queue_size
         self.roi_pub = rospy.Publisher("roi", RegionOfInterest, queue_size=10)
+
+        self.target_pub = rospy.Publisher("/target", Image, queue_size=10)
 
         # Give the camera driver a moment to come up
         rospy.sleep(1)
@@ -73,7 +80,8 @@ class ball_tracking_node:
         self.do_trackPts()
 
         # Refresh the displayed image
-        cv2.imshow(self.cv_window_original,np.hstack([self.cv_image]))
+        cv2.imshow(self.cv_window_original, self.cv_image)
+        cv2.imshow(self.cv_window_target, self.cv_image_target)
         # cv2.imshow(self.cv_window_mask, self.cv_mask)
         cv2.waitKey(1)
 
@@ -85,6 +93,7 @@ class ball_tracking_node:
         # coverting the ROS image data to uint8 OpenCV format
         try:
             self.cv_image = self.bridge.imgmsg_to_cv2(ros_image, "bgr8")
+            self.cv_image_copy = self.cv_image.copy()
         except CvBridgeError as e:
             print(e)
 
@@ -114,18 +123,19 @@ class ball_tracking_node:
                 # find the largest contour in the mask, then use it to compute the minimum enclosing circle and centroid
                 c = max(cnts, key=cv2.contourArea)
                 ((x, y), radius) = cv2.minEnclosingCircle(c)
+
                 M = cv2.moments(c)
                 center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
 
                 # Straight Bounding Rectangle
-                xBox, yBox, w, h = cv2.boundingRect(c)
+                self.xBox, self.yBox, self.w, self.h = cv2.boundingRect(c)
 
                 # RegionOfInterest
                 roi = RegionOfInterest()
-                roi.x_offset = int(M["m10"] / M["m00"])
-                roi.y_offset = int(M["m01"] / M["m00"])
-                roi.width = w
-                roi.height = h
+                roi.x_offset = self.xBox
+                roi.y_offset = self.yBox
+                roi.width = self.w
+                roi.height = self.h
 
                 self.roi_pub.publish(roi)
 
@@ -133,12 +143,23 @@ class ball_tracking_node:
                 if radius > 10:
                     # draw the circle and centroid on the frame, then update the list of tracked points
                     cv2.circle(self.cv_image, (int(x), int(y)), int(radius), (0, 255, 255), 2)
-                    cv2.circle(self.cv_image, center, 5, (0, 0, 255), -1)
+                    # cv2.circle(self.cv_image, (int(x), int(y)), 5, (0, 0, 255), -1)
+                    # cv2.circle(self.cv_image, (int(self.xBox), int(self.yBox)), 15, (255, 0, 255), -1)
+                    # cv2.circle(self.cv_image, (int(self.xBox + w), int(self.yBox + h)), 15, (255, 0, 255), -1)
 
-                    cv2.rectangle(self.cv_image, (xBox, yBox), (xBox + w, yBox + h), (0, 255, 0), 2)
+                    cv2.rectangle(self.cv_image, (self.xBox, self.yBox), (self.xBox + self.w, self.yBox + self.h), (0, 255, 0), 2)
+
+                    # cropped the target image and publish it
+                    self.cv_image_target = self.cv_image_copy[self.yBox:self.yBox + 2*radius, self.xBox:self.xBox + self.w]
+
+                    self.target_pub.publish(self.bridge.cv2_to_imgmsg(self.cv_image_target, "bgr8"))
+
+                    # Un-comment to enable dataset collections
+                    self.do_saveImage()
 
                     # update the points queue
                     self.pts.appendleft(center)
+
         except CvBridgeError as e:
             print (e)
 
@@ -183,9 +204,32 @@ class ball_tracking_node:
 
             self.counter += 1
 
+            # Un-comment if limit the dataset to save
+            # if self.counter > 100:
+            #     rospy.signal_shutdown('Quit')
+
         except CvBridgeError as e:
             print (e)
 
+    def do_saveImage(self):
+        # define the name of the directory to be created (change accordingly)
+        path = "dataset/ball_green"
+
+        try:
+            os.makedirs(path)
+        except OSError:
+            # print ("Creation of the directory %s failed" % path)
+            pass
+        else:
+            # print ("Successfully created the directory %s " % path)
+            pass
+
+        img_no = "{:0>5d}".format(self.counter)
+        filename = path + "/dataset_ball_green_" + str(img_no) +".png"
+        
+        # filename = "dataset/ball_green/dataset_ball_green_" + str(img_no) +".png"
+        rospy.loginfo(filename)
+        cv2.imwrite(filename, self.cv_image_target)
 
 def main(args):
     vn = ball_tracking_node()

@@ -2,7 +2,7 @@
 
 from __future__ import print_function
 import roslib
-# roslib.load_manifest('my_package')
+roslib.load_manifest('camera_tutorials')
 import sys
 import rospy
 import cv2
@@ -11,7 +11,11 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 
 class test_vision_node:
-    def __init__(self):
+    def __init__(self, topics1, topics2):
+
+        self.sub_topics1 = topics1
+        self.sub_topics2 = topics2
+
         # Initializing your ROS Node
         # rospy.init_node('my_node_name', anonymous=True)
         # or
@@ -27,14 +31,15 @@ class test_vision_node:
         # rospy.Publisher initialization
         # pub = rospy.Publisher('topic_name', std_msgs.msg.String, queue_size=10)
         # The only required arguments to create a rospy.Publisher are the topic name, the Message class, and the queue_size
-        self.image_pub = rospy.Publisher("/opencv_img", Image, queue_size=10)
+        self.image_pub = rospy.Publisher(self.sub_topics2, Image, queue_size=10)
         # Create the cv_bridge object
         self.bridge = CvBridge()
 
         # Subscribe to the raw camera image topic
         # subscribe to a topic using rospy.Subscriber class
         # sub=rospy.Subscriber('TOPIC_NAME', TOPIC_MESSAGE_TYPE, name_callback)
-        self.image_sub = rospy.Subscriber("/cv_camera_node/cam0/image_raw", Image, self.callback)
+        # self.image_sub = rospy.Subscriber("/cv_camera_node/cam0/image_raw", Image, self.callback)
+        self.image_sub = rospy.Subscriber(self.sub_topics1, Image, self.callback)
 
     def callback(self,data):
         try:
@@ -45,23 +50,23 @@ class test_vision_node:
             print(e)
 # ------------------------------------------------------------------------------
 # Un-comment this area to view image
-        # # Get the width(cols), height(rows), and channels  of the image
-        # (rows,cols,channels) = cv_image.shape
-        #
-        # # optional (un-comment to preview)
-        # if cols > 60 and rows > 60:
-        #     cv2.circle(cv_image, (50, 50), 10, 255, -1)
-        #
-        # # Overlay some text onto the image display
-        # fontface = cv2.FONT_HERSHEY_DUPLEX
-        # fontscale = 2
-        # fontcolor = (255, 255, 255)
-        # # cv2.putText(img, text, org, fontFace, fontScale, color[, thickness[, lineType[, bottomLeftOrigin]]])
-        # cv2.putText(cv_image, self.cv_window_name, (50, rows / 2), fontface, fontscale, fontcolor, 1)
-        #
-        # # displaying an OpenCV image
-        # cv2.imshow(self.cv_window_name, cv_image)
-        # cv2.waitKey(1)
+        # Get the width(cols), height(rows), and channels  of the image
+        (rows,cols,channels) = cv_image.shape
+
+        # optional (un-comment to preview)
+        if cols > 60 and rows > 60:
+            cv2.circle(cv_image, (50, 50), 10, 255, -1)
+
+        # Overlay some text onto the image display
+        fontface = cv2.FONT_HERSHEY_DUPLEX
+        fontscale = 2
+        fontcolor = (255, 255, 255)
+        # cv2.putText(img, text, org, fontFace, fontScale, color[, thickness[, lineType[, bottomLeftOrigin]]])
+        cv2.putText(cv_image, self.cv_window_name, (50, rows / 2), fontface, fontscale, fontcolor, 1)
+
+        # displaying an OpenCV image
+        cv2.imshow(self.cv_window_name, cv_image)
+        cv2.waitKey(1)
 # ------------------------------------------------------------------------------
 
         try:
@@ -71,8 +76,13 @@ class test_vision_node:
         except CvBridgeError as e:
             print(e)
 
+def usage():
+    # sys.argv[0] ==> name of the script
+    print("Please specify rostopic to subscribe/publish:")
+    print("%s [subscribed/published topic name]" % sys.argv[0])
+
 def main(args):
-    vn = test_vision_node()
+    vn = test_vision_node(sys.argv[1], sys.argv[2])
 
     try:
         rospy.spin()
@@ -82,4 +92,10 @@ def main(args):
     cv2.destroyAllWindows()
 
 if __name__ == '__main__':
-    main(sys.argv)
+    if len(sys.argv) == 3:
+        print("[Subscribed Topic Name]: %s " % sys.argv[1])
+        print("[Published Topic Name]: %s " % sys.argv[2])
+        main(sys.argv)
+    else:
+        print(usage())
+        sys.exit(1)
