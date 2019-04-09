@@ -7,6 +7,7 @@ import sys
 import rospy
 import os
 import cv2
+import imutils
 from std_msgs.msg import String
 from camera_tutorials.msg import IntList
 from sensor_msgs.msg import Image
@@ -30,8 +31,8 @@ class range_detector_node:
         self.cv_window_thresh = "Thresh_%s" % self.color_tags
         self.cv_window_preview = "Preview_%s" % self.color_tags
 
-        pub_name = '/range_filter_%s' % self.color_tags
-        self.range_pub = rospy.Publisher(pub_name, IntList, queue_size=10)
+        self.pub_name = '/range_filter_%s' % self.color_tags
+        self.range_pub = rospy.Publisher(self.pub_name, IntList, queue_size=10)
 
         # Create the cv_bridge object
         self.bridge = CvBridge()
@@ -100,6 +101,11 @@ class range_detector_node:
         # coverting the ROS image data to uint8 OpenCV format
         try:
             self.cv_image = self.bridge.imgmsg_to_cv2(ros_image, "bgr8")
+# ------------------------------------------------------------------------------
+            self.cv_image = imutils.resize(self.cv_image, width=320)
+# ------------------------------------------------------------------------------
+            self.cv_image = cv2.flip(self.cv_image, 1)
+
         except CvBridgeError as e:
             print(e)
 

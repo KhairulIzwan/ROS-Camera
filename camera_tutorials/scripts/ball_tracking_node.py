@@ -4,7 +4,7 @@
 
 from __future__ import print_function
 import roslib
-# roslib.load_manifest('my_package')
+roslib.load_manifest('camera_tutorials')
 import sys
 import rospy
 import cv2
@@ -21,7 +21,10 @@ from collections import deque
 import os
 
 class ball_tracking_node:
-    def __init__(self):
+    def __init__(self, color, topics1):
+
+        self.sub_topics1 = topics1
+        self.color = color
         # Initializing your ROS Node
         # rospy.init_node('my_node_name', anonymous=True)
         # or
@@ -63,8 +66,11 @@ class ball_tracking_node:
         # Subscribe to the raw camera image topic
         # subscribe to a topic using rospy.Subscriber class
         # sub=rospy.Subscriber('TOPIC_NAME', TOPIC_MESSAGE_TYPE, name_callback)
-        self.image_sub = rospy.Subscriber("/cv_camera_node/cam0/image_raw", Image, self.callback)
-        self.filter_sub = rospy.Subscriber("/range_filter", IntList, self.filter_callback)
+        self.image_sub = rospy.Subscriber(self.sub_topics1, Image, self.callback)
+
+        # self.filter_sub = rospy.Subscriber("/range_filter", IntList, self.filter_callback)
+        self.sub_name = '/range_filter_%s' % self.color
+        self.filter_sub = rospy.Subscriber(self.sub_name, IntList, self.filter_callback)
 
     def callback(self, data):
         # Convert the raw image to OpenCV format using the convert_image() helper function
@@ -81,7 +87,7 @@ class ball_tracking_node:
 
         # Refresh the displayed image
         cv2.imshow(self.cv_window_original, self.cv_image)
-        cv2.imshow(self.cv_window_target, self.cv_image_target)
+        # cv2.imshow(self.cv_window_target, self.cv_image_target)
         # cv2.imshow(self.cv_window_mask, self.cv_mask)
         cv2.waitKey(1)
 
@@ -155,7 +161,7 @@ class ball_tracking_node:
                     self.target_pub.publish(self.bridge.cv2_to_imgmsg(self.cv_image_target, "bgr8"))
 
                     # Un-comment to enable dataset collections
-                    self.do_saveImage()
+                    # self.do_saveImage()
 
                     # update the points queue
                     self.pts.appendleft(center)
@@ -226,13 +232,17 @@ class ball_tracking_node:
 
         img_no = "{:0>5d}".format(self.counter)
         filename = path + "/dataset_ball_green_" + str(img_no) +".png"
-        
+
         # filename = "dataset/ball_green/dataset_ball_green_" + str(img_no) +".png"
         rospy.loginfo(filename)
         cv2.imwrite(filename, self.cv_image_target)
 
+def usage():
+    print("Please specify color name:")
+    print("%s [Color Name]" % sys.argv[0])
+
 def main(args):
-    vn = ball_tracking_node()
+    vn = ball_tracking_node(sys.argv[1], sys.argv[2])
 
     try:
         rospy.spin()
@@ -242,4 +252,10 @@ def main(args):
     cv2.destroyAllWindows()
 
 if __name__ == '__main__':
-    main(sys.argv)
+    if len(sys.argv) == 3:
+        print("[Color Name]: %s" % sys.argv[1])
+        print("[Topic Name]: %s" % sys.argv[2])
+        main(sys.argv)
+    else:
+        print(usage())
+        sys.exit(1)
