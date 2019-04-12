@@ -5,15 +5,23 @@
 from __future__ import print_function
 import roslib
 roslib.load_manifest('camera_tutorials')
+
 import sys
 import rospy
 import cv2
 import numpy as np
 import imutils
+
 from std_msgs.msg import String
-from sensor_msgs.msg import Image, RegionOfInterest, CameraInfo
+from sensor_msgs.msg import Image
+from sensor_msgs.msg import RegionOfInterest
+from sensor_msgs.msg import CameraInfo
+
 from camera_tutorials.msg import IntList
-from cv_bridge import CvBridge, CvBridgeError
+from camera_tutorials.msg import detailROI
+
+from cv_bridge import CvBridge
+from cv_bridge import CvBridgeError
 
 from collections import deque
 """  a list-like data structure with super fast appends and pops to maintain a list of the past N (x, y)-locations of the ball in our video stream. Maintaining such a queue allows us to draw the "contrail" of the ball as its being tracked """
@@ -21,54 +29,51 @@ from collections import deque
 import os
 
 class color_tracking_node:
-    def __init__(self):
+    def __init__(self, names, v1_min, v2_min, v3_min, v1_max, v2_max, v3_max):
+        self.names = names
 
-        """  Initializing your ROS Node """
-        """  rospy.init_node('my_node_name', anonymous=True) or rospy.init_node('my_node_name') """
-        rospy.init_node('color_tracking_node', anonymous=True)
+        self.v1_min = v1_min
+        self.v2_min = v2_min
+        self.v3_min = v3_min
+        self.v1_max = v1_max
+        self.v2_max = v2_max
+        self.v3_max = v3_max
 
-        """  Give the OpenCV display window a name """
-        self.cv_window_original = "OpenCV Image"
-        self.cv_window_mask = "OpenCV Image Mask"
-        self.cv_window_target = "Target"
+        """ Initializing your ROS Node """
+        rospy.init_node('color_tracking_node_' + self.names, anonymous=True)
 
-        """  initialize the list of tracked points, the frame counter, and the coordinate deltas """
+        """ Give the OpenCV display window a name """
+        self.cv_window_original = self.names + " Ball"
+
+        """ initialize the list of tracked points, the frame counter, and the coordinate deltas """
         self.pts = deque(maxlen=64)
         self.counter = 0
         (self.dX, self.dY) = (0, 0)
         self.direction = ""
 
-        """  rospy.Publisher initialization """
-        """  pub = rospy.Publisher('topic_name', std_msgs.msg.String, queue_size=10) """
-        """  The only required arguments to create a rospy.Publisher are the topic name, the Message class, and the queue_size """
-        self.imgROI_pub = rospy.Publisher("/roi", RegionOfInterest, queue_size=10)
+        """ Publish roi topic """
+        self.imgROI_pub = rospy.Publisher("/roi_" + self.names, detailROI, queue_size=10)
 
-        """ (optional) """
-        # self.target_pub = rospy.Publisher("/target", Image, queue_size=10)
-
-        """  Give the camera driver a moment to come up """
+        """ Give the camera driver a moment to come up """
         rospy.sleep(1)
 
-        """  Create the cv_bridge object """
+        """ Create the cv_bridge object """
         self.bridge = CvBridge()
 
-        """  subscribe to a topic using rospy.Subscriber class """
-        """  sub = rospy.Subscriber('TOPIC_NAME', TOPIC_MESSAGE_TYPE, name_callback) """
-
-        """  Subscribe to the raw camera image topic """
+        """ Subscribe to the raw camera image topic """
         self.imgRaw_sub = rospy.Subscriber("/cam0/image_raw", Image, self.callback)
 
-        """  Subscribe to the info camera topic """
+        """ Subscribe to the camera info topic """
         self.imgInfo_sub = rospy.Subscriber("/cam0/camera_info", CameraInfo, self.getCameraInfo)
 
         # TODO: Need to replace this; read from files
-        """  Color Range (Upper and Lower) """
         """ define the lower and upper boundaries of the colors in the HSV color space """
-        self.lower = {'green':(12, 59, 50)}
-        self.upper = {'green':(53, 204, 216)}
+        self.lower = {str(self.names):(int(self.v1_min), int(self.v2_min), int(self.v3_min))}
+        self.upper = {str(self.names):(int(self.v1_max), int(self.v2_max), int(self.v3_max))}
 
+        # TODO:
         """ define standard colors for circle around the object """
-        self.colors = {'green':(0,255,0)}
+        self.colors = {"Green":(0,255,0), "Red":(0,0,255)}
 
     def callback(self, data):
         """ Convert the raw image to OpenCV format using the cvtImage() helper function """
@@ -80,26 +85,24 @@ class color_tracking_node:
         """ Apply ball tracking using colorDetection() helper function """
         self.colorDetection()
 
+        """ OPTIONAL """
         """Un-comment to get tracking echo"""
-        # self.ptsTrack()
+        self.ptsTrack()
 
-        """ Refresh the displayed image """
-        cv2.imshow(self.cv_window_original, self.cv_image)
-        # cv2.imshow(self.cv_window_target, self.cv_image_target)
-        # cv2.imshow(self.cv_window_mask, self.cv_mask)
-        cv2.waitKey(1)
+        """ Refresh the image on the screen """
+        self.displayImg()
 
-    def cvtImage(self, ros_image):
-        """ coverting the ROS image data to uint8 OpenCV format """
+    """ Convert the raw image to OpenCV format """
+    def cvtImage(self, data):
         try:
-            self.cv_image = self.bridge.imgmsg_to_cv2(ros_image, "bgr8")
-            self.cv_image_copy = self.cv_image.copy()
+            """ Convert the raw image to OpenCV format """
+            self.cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
 
         except CvBridgeError as e:
             print(e)
 
+    """ resize the frame, blur it, and convert it to the HSV color space """
     def imgProcessing(self):
-        """ resize the frame, blur it, and convert it to the HSV color space """
         if (self.image_width > 320):
             self.cv_image = imutils.resize(self.cv_image, width = 320)
         else:
@@ -111,12 +114,13 @@ class color_tracking_node:
         self.blurred = cv2.GaussianBlur(self.cv_image, (11, 11), 0)
         self.hsv = cv2.cvtColor(self.blurred, cv2.COLOR_BGR2HSV)
 
+    """ Get the width and height of the image """
     def getCameraInfo(self, msg):
         self.image_width = msg.width
         self.image_height = msg.height
 
     def colorDetection(self):
-        self.mask = cv2.inRange(self.hsv, self.lower["green"], self.upper["green"])
+        self.mask = cv2.inRange(self.hsv, self.lower[self.names], self.upper[self.names])
         self.mask = cv2.erode(self.mask, None, iterations=2)
         self.mask = cv2.dilate(self.mask, None, iterations=2)
 
@@ -141,27 +145,38 @@ class color_tracking_node:
             self.xBox, self.yBox, self.w, self.h = cv2.boundingRect(self.c)
 
             """ RegionOfInterest """
-            roi = RegionOfInterest()
-            roi.x_offset = self.xBox
-            roi.y_offset = self.yBox
+            # roi = RegionOfInterest()
+            # roi.x_offset = self.xBox
+            # roi.y_offset = self.yBox
+            # roi.width = self.w
+            # roi.height = self.h
+
+            """ Detail RegionOfInterest """
+            roi = detailROI()
+            roi.colorName = self.names
+            roi.offsetX = self.xBox
+            roi.offsetY = self.yBox
             roi.width = self.w
             roi.height = self.h
+            roi.x = self.x
+            roi.y = self.y
+            roi.radius = self.radius
+            # roi.center = self.center
 
             self.imgROI_pub.publish(roi)
 
-            """ Compute the center of the ROI """
-            # COG_x = roi.x_offset + roi.width / 2 - self.image_width / 2
-            # COG_y = roi.y_offset + roi.height / 2 - self.image_height / 2
-
+            """ OPTIONAL """
             """ only proceed if the radius meets a minimum size. Correct this value for your obect's size """
             if self.radius > 10:
                 """ draw the circle and centroid on the frame, then update the list of tracked points """
-                cv2.circle(self.cv_image, (int(self.x), int(self.y)), int(self.radius), self.colors["green"], 2)
-                cv2.circle(self.cv_image, (int(self.x), int(self.y)), 5, self.colors["green"], -1) # center points
+                cv2.circle(self.cv_image, (int(self.x), int(self.y)), int(self.radius), self.colors[self.names], 2)
+                cv2.circle(self.cv_image, (int(self.x), int(self.y)), 5, self.colors[self.names], -1) # center points
                 # cv2.circle(self.cv_image, (int(COG_y), int(COG_x)), 5, self.colors["green"], -1) # center points
-                cv2.putText(self.cv_image, "green" + " ball", (int(self.x - self.radius),int(self.y - self.radius)), cv2.FONT_HERSHEY_SIMPLEX, 0.6, self.colors["green"],2)
+                cv2.putText(self.cv_image, self.names + " ball", (int(self.x - self.radius),int(self.y - self.radius)), cv2.FONT_HERSHEY_SIMPLEX, 0.6, self.colors[self.names],2)
 
-                cv2.putText(self.cv_image, "Green" + " Colored Ball Detected!", (10, 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 255, 0), 2)
+                cv2.putText(self.cv_image, self.names + " Colored Ball Detected!", (10, 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, self.colors[self.names], 2)
+
+                rospy.loginfo([self.names + " Colored Ball Detected!"])
 
                 """ (optional) cropped the target image and publish it """
                 # self.cv_image_target = self.cv_image_copy[int(self.yBox):int(self.yBox + 2*radius), int(self.xBox):int(self.xBox + self.w)]
@@ -175,8 +190,12 @@ class color_tracking_node:
 
             else:
                 cv2.putText(self.cv_image, "No Colored Ball Detected!", (10, 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
+                # pass
+                # rospy.logwarn(["No Colored Ball Detected!"])
         else:
             cv2.putText(self.cv_image, "No Colored Ball Detected!", (10, 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
+            # pass
+            # rospy.logwarn(["No Colored Ball Detected!"])
 
     def ptsTrack(self):
         """ loop over the set of tracked points """
@@ -243,21 +262,17 @@ class color_tracking_node:
         rospy.loginfo(filename)
         cv2.imwrite(filename, self.cv_image_target)
 
-def usage():
-    print("Please specify color name:")
-    print("%s [Color Name]" % sys.argv[0])
+    """ Refresh the image on the screen """
+    def displayImg(self):
+        cv2.imshow(self.cv_window_name, self.cv_image)
+        cv2.waitKey(1)
 
-    # if len(sys.argv) == 3:
-    #     print("Ball Tracking Node [ONLINE]")
-    #     print("[Color Name]: %s" % sys.argv[1])
-    #     print("[Topic Name]: %s" % sys.argv[2])
-    #     main(sys.argv)
-    # else:
-    #     print(usage())
-    #     sys.exit(1)
+def usage():
+    print("Please specify:")
+    print("%s [Color Name] [v1_min] [v2_min] [v3_min] [v1_max] [v2_max] [v3_max]" % sys.argv[0])
 
 def main(args):
-    vn = color_tracking_node()
+    vn = color_tracking_node(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6], sys.argv[7])
 
     try:
         rospy.spin()
@@ -267,4 +282,8 @@ def main(args):
     cv2.destroyAllWindows()
 
 if __name__ == '__main__':
-    main(sys.argv)
+    if len(sys.argv) == 8:
+        main(sys.argv)
+    else:
+        print(usage())
+        sys.exit(1)

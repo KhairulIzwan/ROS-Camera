@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# multiple color tracking (color)
+# multiple color tracking (color) -- useful for display
 
 from __future__ import print_function
 import roslib
@@ -141,7 +141,7 @@ class multiple_color_tracking_node:
                 """ Centroid is given by the relations, Cx=M10/M00 and Cy=M01/M00 """
                 self.center = (int(self.M["m10"] / self.M["m00"]), int(self.M["m01"] / self.M["m00"]))
 
-                # TODO:
+                # TODO: Find a good way to publish multiple ROI
                 # --------------------------------------------------------------
                 """ Straight Bounding Rectangle """
                 # self.xBox, self.yBox, self.w, self.h = cv2.boundingRect(self.c)
