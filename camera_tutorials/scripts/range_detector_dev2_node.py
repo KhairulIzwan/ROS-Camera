@@ -28,7 +28,7 @@ class range_detector_node:
         rospy.init_node('range_detector_node', anonymous=True)
 
         """ Give the OpenCV display window a name """
-        self.cv_window_name = "OpenCV Image"
+        self.cv_window_name = "Range Detector Node"
 
         """ Create the cv_bridge object """
         self.bridge = CvBridge()

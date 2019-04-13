@@ -43,16 +43,13 @@ class color_tracking_node:
         rospy.init_node('color_tracking_node_' + self.names, anonymous=True)
 
         """ Give the OpenCV display window a name """
-        self.cv_window_original = self.names + " Ball"
+        self.cv_window_name = self.names + " Ball"
 
         """ initialize the list of tracked points, the frame counter, and the coordinate deltas """
-        self.pts = deque(maxlen=64)
+        self.pts = deque(maxlen=32)
         self.counter = 0
         (self.dX, self.dY) = (0, 0)
         self.direction = ""
-
-        """ Publish roi topic """
-        self.imgROI_pub = rospy.Publisher("/roi_" + self.names, detailROI, queue_size=10)
 
         """ Give the camera driver a moment to come up """
         rospy.sleep(1)
@@ -71,9 +68,12 @@ class color_tracking_node:
         self.lower = {str(self.names):(int(self.v1_min), int(self.v2_min), int(self.v3_min))}
         self.upper = {str(self.names):(int(self.v1_max), int(self.v2_max), int(self.v3_max))}
 
-        # TODO:
+        # TODO: Need to replace this; read from files
         """ define standard colors for circle around the object """
         self.colors = {"Green":(0,255,0), "Red":(0,0,255)}
+
+        """ Publish roi topic """
+        self.imgROI_pub = rospy.Publisher("/roi_" + self.names, detailROI, queue_size=10)
 
     def callback(self, data):
         """ Convert the raw image to OpenCV format using the cvtImage() helper function """
@@ -85,8 +85,7 @@ class color_tracking_node:
         """ Apply ball tracking using colorDetection() helper function """
         self.colorDetection()
 
-        """ OPTIONAL """
-        """Un-comment to get tracking echo"""
+        """ Visualize the tracking echo"""
         self.ptsTrack()
 
         """ Refresh the image on the screen """
@@ -152,60 +151,69 @@ class color_tracking_node:
             # roi.height = self.h
 
             """ Detail RegionOfInterest """
-            roi = detailROI()
-            roi.colorName = self.names
-            roi.offsetX = self.xBox
-            roi.offsetY = self.yBox
-            roi.width = self.w
-            roi.height = self.h
-            roi.x = self.x
-            roi.y = self.y
-            roi.radius = self.radius
-            # roi.center = self.center
+            # roi = detailROI()
+            # roi.colorName = self.names
+            # roi.offsetX = self.xBox
+            # roi.offsetY = self.yBox
+            # roi.width = self.w
+            # roi.height = self.h
+            # roi.x = self.x
+            # roi.y = self.y
+            # roi.radius = self.radius
+            #
+            # self.imgROI_pub.publish(roi)
 
-            self.imgROI_pub.publish(roi)
-
-            """ OPTIONAL """
             """ only proceed if the radius meets a minimum size. Correct this value for your obect's size """
             if self.radius > 10:
+
+                """ Detail RegionOfInterest """
+                roi = detailROI()
+                roi.colorName = self.names
+                roi.offsetX = self.xBox
+                roi.offsetY = self.yBox
+                roi.width = self.w
+                roi.height = self.h
+                roi.x = self.x
+                roi.y = self.y
+                roi.radius = self.radius
+
+                self.imgROI_pub.publish(roi)
+
                 """ draw the circle and centroid on the frame, then update the list of tracked points """
                 cv2.circle(self.cv_image, (int(self.x), int(self.y)), int(self.radius), self.colors[self.names], 2)
                 cv2.circle(self.cv_image, (int(self.x), int(self.y)), 5, self.colors[self.names], -1) # center points
                 # cv2.circle(self.cv_image, (int(COG_y), int(COG_x)), 5, self.colors["green"], -1) # center points
                 cv2.putText(self.cv_image, self.names + " ball", (int(self.x - self.radius),int(self.y - self.radius)), cv2.FONT_HERSHEY_SIMPLEX, 0.6, self.colors[self.names],2)
 
-                cv2.putText(self.cv_image, self.names + " Colored Ball Detected!", (10, 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, self.colors[self.names], 2)
+                cv2.putText(self.cv_image, self.names + " Colored Ball Detected!", (10, 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, self.colors[self.names], 1)
 
-                rospy.loginfo([self.names + " Colored Ball Detected!"])
+                # rospy.loginfo([self.names + " Colored Ball Detected!"])
 
-                """ (optional) cropped the target image and publish it """
-                # self.cv_image_target = self.cv_image_copy[int(self.yBox):int(self.yBox + 2*radius), int(self.xBox):int(self.xBox + self.w)]
-                # self.target_pub.publish(self.bridge.cv2_to_imgmsg(self.cv_image_target, "bgr8"))
+                """ Update the points queue """
+                self.pts.appendleft(self.center)
 
-                """ Un-comment to enable dataset collections """
+                """ Dataset collections - For ML/AI purpose only """
                 # self.do_saveImage()
 
-                """ update the points queue """
-                # self.pts.appendleft(self.center)
-
             else:
-                cv2.putText(self.cv_image, "No Colored Ball Detected!", (10, 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
-                # pass
+                cv2.putText(self.cv_image, "No Colored Ball Detected!", (10, 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 1)
                 # rospy.logwarn(["No Colored Ball Detected!"])
+                # pass
         else:
-            cv2.putText(self.cv_image, "No Colored Ball Detected!", (10, 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
-            # pass
+            cv2.putText(self.cv_image, "No Colored Ball Detected!", (10, 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 1)
             # rospy.logwarn(["No Colored Ball Detected!"])
+            # pass
 
     def ptsTrack(self):
         """ loop over the set of tracked points """
         for i in range(1, len(self.pts)):
+
             """ if either of the tracked points are None, ignore them """
             if self.pts[i - 1] is None or self.pts[i] is None:
                 continue
 
             """ check to see if enough points have been accumulated in the buffer """
-            if self.counter >= 10 and i == 1 and self.pts[-10] is not None:
+            if self.counter >= 10 and i == 10 and self.pts[i-10] is not None:
                 """ compute the difference between the x and y coordinates and re-initialize the direction text variables """
                 self.dX = self.pts[-10][0] - self.pts[i][0]
                 self.dY = self.pts[-10][1] - self.pts[i][1]
@@ -223,25 +231,26 @@ class color_tracking_node:
                 if self.dirX != "" and self.dirY != "":
                     self.direction = "{}-{}".format(self.dirY, self.dirX)
 
-                # """ otherwise, only one direction is non-empty """
+                    """ otherwise, only one direction is non-empty """
                 else:
                     self.direction = self.dirX if self.dirX != "" else self.dirY
 
             """ otherwise, compute the thickness of the line and draw the connecting lines """
-            thickness = int(np.sqrt(64 / float(i + 1)) * 2.5)
-            cv2.line(self.cv_image, self.pts[i - 1], self.pts[i], (0, 0, 255), thickness)
+            thickness = int(np.sqrt(32 / float(i + 1)) * 2.5)
+            cv2.line(self.cv_image, self.pts[i - 1], self.pts[i], (255, 255, 255), thickness)
 
         """ show the movement deltas and the direction of movement on the frame """
-        cv2.putText(self.cv_image, self.direction, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.65, (0, 0, 255), 3)
+        cv2.putText(self.cv_image, self.direction, (10, self.cv_image.shape[0] - 50), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 1)
         cv2.putText(self.cv_image, "dx: {}, dy: {}".format(self.dX, self.dY), (10, self.cv_image.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 0, 255), 1)
-        # cv2.putText(self.cv_image, "counter: {}".format(self.counter), (10, self.cv_image.shape[0] - 30), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 0, 255), 1)
+        cv2.putText(self.cv_image, "counter: {}".format(self.counter), (10, self.cv_image.shape[0] - 30), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 0, 255), 1)
 
         self.counter += 1
 
-        """ Un-comment if limit the dataset to save """
+        """ Limit the dataset to save """
         # if self.counter > 100:
         #     rospy.signal_shutdown('Quit')
 
+    # TODO: In order to apply ML -- Need to collect data
     def do_saveImage(self):
         """ define the name of the directory to be created (change accordingly) """
         path = "/home/khairulizwan/catkin_ws/src/ROS-Camera/camera_tutorials/dataset/ball_green"
@@ -249,10 +258,10 @@ class color_tracking_node:
         try:
             os.makedirs(path)
         except OSError:
-            # print ("Creation of the directory %s failed" % path)
+            print ("Creation of the directory %s failed" % path)
             pass
         else:
-            # print ("Successfully created the directory %s " % path)
+            print ("Successfully created the directory %s " % path)
             pass
 
         img_no = "{:0>5d}".format(self.counter)
@@ -260,7 +269,7 @@ class color_tracking_node:
 
         # filename = "dataset/ball_green/dataset_ball_green_" + str(img_no) +".png"
         rospy.loginfo(filename)
-        cv2.imwrite(filename, self.cv_image_target)
+        # cv2.imwrite(filename, self.cv_image_target)
 
     """ Refresh the image on the screen """
     def displayImg(self):
@@ -277,12 +286,13 @@ def main(args):
     try:
         rospy.spin()
     except KeyboardInterrupt:
-        print("Shutting down")
+        print("Color tracking node [OFFLINE]...")
 
     cv2.destroyAllWindows()
 
 if __name__ == '__main__':
     if len(sys.argv) == 8:
+        print("Color tracking node [ONLINE]...")
         main(sys.argv)
     else:
         print(usage())

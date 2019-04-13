@@ -26,7 +26,7 @@ class test_vision_node:
         rospy.init_node('test_vision_node', anonymous=True)
 
         """ Give the OpenCV display window a name """
-        self.cv_window_name = "OpenCV Image"
+        self.cv_window_name = "Test Vision Node"
 
         """ Create the cv_bridge object """
         self.bridge = CvBridge()
