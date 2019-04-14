@@ -37,10 +37,10 @@ class test_vision_node:
         """ sub = rospy.Subscriber('TOPIC_NAME', TOPIC_MESSAGE_TYPE, name_callback) """
 
         """ Subscribe to the raw camera image topic """
-        self.image_sub = rospy.Subscriber("/cam0/image_raw", Image, self.callback)
+        self.image_sub = rospy.Subscriber("/camUSB/image_raw", Image, self.callback)
 
         """  Subscribe to the info camera topic """
-        self.imgInfo_sub = rospy.Subscriber("/cam0/camera_info", CameraInfo, self.getCameraInfo)
+        self.imgInfo_sub = rospy.Subscriber("/camUSB/camera_info", CameraInfo, self.getCameraInfo)
 
     def callback(self,data):
         """ Convert the raw image to OpenCV format using the convert_image() helper function """
